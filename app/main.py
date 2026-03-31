@@ -20,15 +20,9 @@ if __name__ == "__main__":
         },
     }
 
+    # 运行过程中会在每一步实时打印结果与中文解释
     result = run_agent(sample_request)
 
-    # 单独输出每个 step 的结果和中文解释
-    for item in result["decision_trace"]:
-        print(f"\n[Step {item['step']}] {item['action']}")
-        print(f"说明: {item['explanation']}")
-        print("结果:")
-        print(json.dumps(item["result"], ensure_ascii=False, indent=2))
-
-    # 打印完整响应
+    # 最终打印完整响应
     print("\n=== Agent Response ===")
     print(json.dumps(result, ensure_ascii=False, indent=2))

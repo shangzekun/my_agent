@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from schemas import (
     AgentRequest,
     AgentResponse,
@@ -42,16 +44,20 @@ class SPRProcessAgent:
         result: dict[str, object],
         explanation: str,
     ) -> None:
-        """记录每一步的结果与中文解释。"""
+        """记录每一步的结果与中文解释，并实时输出当前步骤结果。"""
 
-        trace.append(
-            {
-                "step": step,
-                "action": action,
-                "result": result,
-                "explanation": explanation,
-            }
-        )
+        record = {
+            "step": step,
+            "action": action,
+            "result": result,
+            "explanation": explanation,
+        }
+        trace.append(record)
+
+        print(f"\n[Step {step}] {action}")
+        print(f"说明: {explanation}")
+        print("结果:")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
 
     def run(self, request: AgentRequest) -> AgentResponse:
         trace: list[dict[str, object]] = []
