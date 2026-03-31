@@ -17,10 +17,12 @@ from tools import (
     SimulationHistoryClient,
 )
 
+from agent.proposal_generator import ProposalGenerator
 from agent.ranker import SchemeRanker
 
 
 class SPRProcessAgent:
+    """固定步骤的 SPR 工艺开发工作流 Agent。"""
     """Fixed-step SPR process development workflow agent."""
 
     def __init__(self) -> None:
