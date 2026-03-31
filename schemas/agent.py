@@ -29,3 +29,9 @@ class AgentResponse(BaseModel):
     best_result: Optional[RankedResult] = None
     ranked_results: list[RankedResult]
     decision_trace: list[dict[str, Any]]
+    proposal_summary: str
+    risks: list[str]
+    human_checkpoints: list[str]
+    alternative_comparison: list[str]
+    llm_enabled: bool
+    llm_status: str

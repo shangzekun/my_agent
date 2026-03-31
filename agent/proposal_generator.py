@@ -11,12 +11,13 @@ from schemas.request import AgentRequest
 
 
 class ProposalGenerator:
-    """受控建议生成器：优先调用 LLM，失败时自动回退。"""
+    """受控建议生成器：优先调用 DeepSeek，失败时自动回退。"""
 
     def __init__(self) -> None:
         self.llm_enabled = self._read_bool_env("LLM_ENABLED", default=False)
-        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-        self.timeout = float(os.getenv("OPENAI_TIMEOUT", "10"))
+        self.model = os.getenv("DEEPSEEK_MODEL", os.getenv("OPENAI_MODEL", "deepseek-chat"))
+        self.base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+        self.timeout = float(os.getenv("LLM_TIMEOUT", "10"))
 
     def generate(
         self,
@@ -78,15 +79,15 @@ class ProposalGenerator:
         }
 
     def _call_llm(self, context: dict[str, Any]) -> str:
-        """调用 OpenAI SDK，请求严格 JSON 输出。"""
+        """通过 OpenAI SDK 兼容接口调用 DeepSeek，并要求严格 JSON 输出。"""
 
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("DEEPSEEK_API_KEY", os.getenv("OPENAI_API_KEY"))
         if not api_key:
-            raise RuntimeError("OPENAI_API_KEY 缺失")
+            raise RuntimeError("DEEPSEEK_API_KEY 缺失")
 
         from openai import OpenAI
 
-        client = OpenAI(api_key=api_key, timeout=self.timeout)
+        client = OpenAI(api_key=api_key, base_url=self.base_url, timeout=self.timeout)
         user_prompt = USER_PROMPT_TEMPLATE.format(context_json=json.dumps(context, ensure_ascii=False))
 
         response = client.chat.completions.create(
