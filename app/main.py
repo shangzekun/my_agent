@@ -6,7 +6,6 @@ from agent.workflow import run_agent
 
 
 if __name__ == "__main__":
-    # 示例请求：直接走本地函数入口
     sample_request = {
         "request_id": "REQ-20260331-0001",
         "joint_info": {
@@ -21,6 +20,4 @@ if __name__ == "__main__":
     }
 
     result = run_agent(sample_request)
-
-    # 打印完整输出，包含新增 LLM 建议字段
     print(json.dumps(result, ensure_ascii=False, indent=2))

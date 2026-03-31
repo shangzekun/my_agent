@@ -23,6 +23,7 @@ from agent.ranker import SchemeRanker
 
 class SPRProcessAgent:
     """固定步骤的 SPR 工艺开发工作流 Agent。"""
+    """Fixed-step SPR process development workflow agent."""
 
     def __init__(self) -> None:
         self.material_mapper = MaterialMapper()
@@ -32,7 +33,6 @@ class SPRProcessAgent:
         self.simulation_history_client = SimulationHistoryClient()
         self.simulation_executor_client = SimulationExecutorClient()
         self.ranker = SchemeRanker()
-        self.proposal_generator = ProposalGenerator()
 
     def run(self, request: AgentRequest) -> AgentResponse:
         trace: list[dict[str, object]] = []
@@ -130,50 +130,18 @@ class SPRProcessAgent:
         trace.append({"step": 8, "action": "rank_schemes", "ranked": [r.model_dump() for r in ranked_results]})
 
         best = ranked_results[0] if ranked_results else None
-
-        trace.append(
-            {
-                "step": 9,
-                "action": "llm_generate_proposal_start",
-                "context": {
-                    "request_id": request.request_id,
-                    "candidate_count": len(evaluations),
-                    "ranked_count": len(ranked_results),
-                },
-            }
-        )
-        proposal = self.proposal_generator.generate(
-            request=request,
-            history_result=process_history,
-            evaluated_candidates=evaluations,
-            ranked_results=ranked_results,
-            best_result=best,
-        )
-        if proposal["llm_status"] == "success":
-            trace.append({"step": 9, "action": "llm_generate_proposal_success"})
-        elif proposal["llm_status"] == "fallback":
-            trace.append({"step": 9, "action": "llm_generate_proposal_fallback"})
-        else:
-            trace.append({"step": 9, "action": "llm_generate_proposal_disabled"})
-
-        trace.append({"step": 10, "action": "output_best", "best": best.model_dump() if best else None})
+        trace.append({"step": 9, "action": "output_best", "best": best.model_dump() if best else None})
 
         return AgentResponse(
             request_id=request.request_id,
             best_result=best,
             ranked_results=ranked_results,
             decision_trace=trace,
-            proposal_summary=proposal["proposal_summary"],
-            risks=proposal["risks"],
-            human_checkpoints=proposal["human_checkpoints"],
-            alternative_comparison=proposal["alternative_comparison"],
-            llm_enabled=proposal["llm_enabled"],
-            llm_status=proposal["llm_status"],
         )
 
 
 def run_agent(request: dict) -> dict:
-    """统一入口：输入字典，输出字典。"""
+    """Unified entrypoint accepting dict payload and returning dict response."""
 
     agent = SPRProcessAgent()
     req_model = AgentRequest.model_validate(request)
